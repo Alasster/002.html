@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Найди пару</title>
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            flex-direction: column;
+            padding: 10px;
+            box-sizing: border-box;
+        }
+        .container {
+            display: flex;
+            flex-wrap: wrap; /* Позволяет блокам становиться в столбец на узких экранах */
+            gap: 20px;
+            width: 100%;
+            max-width: 500px; /* Ограничиваем ширину для адаптивности */
+        }
+        .column {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            min-width: 140px; /* Чтобы блоки не сжимались слишком сильно */
+        }
+        .block {
+            padding: 15px;
+            background: white;
+            text-align: center;
+            font-size: 18px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            transition: background 0.3s, transform 0.2s;
+        }
+        .interactive {
+            cursor: grab;
+            background: #add8e6;
+            transition: transform 0.2s;
+        }
+        .interactive:active {
+            cursor: grabbing;
+            transform: scale(1.05);
+        }
+        button {
+            margin-top: 20px;
+            padding: 10px 20px;
+            font-size: 16px;
+            background: #7CA982;
+            color: white;
+            border: none;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+
+        /* Адаптивный дизайн */
+        @media (max-width: 600px) {
+            .container {
+                flex-direction: column; /* В мобильной версии всё в один столбец */
+                align-items: center;
+            }
+            .column {
+                width: 100%;
+                align-items: center;
+            }
+            .block {
+                width: 80%;
+                max-width: 250px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="column" id="left-column">
+            <div class="block">А</div>
+            <div class="block">Б</div>
+            <div class="block">В</div>
+        </div>
+        <div class="column" id="right-column">
+            <div class="block interactive" draggable="true">1</div>
+            <div class="block interactive" draggable="true">2</div>
+            <div class="block interactive" draggable="true">3</div>
+        </div>
+    </div>
+    <button onclick="checkOrder()">✔️ Проверить</button>
+    
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            let rightColumn = document.getElementById("right-column");
+            let blocks = Array.from(rightColumn.children);
+            blocks.sort(() => Math.random() - 0.5);
+            blocks.forEach(block => rightColumn.appendChild(block));
+        });
+        
+        let draggedElement = null;
+        document.querySelectorAll(".interactive").forEach(block => {
+            block.addEventListener("dragstart", function(e) {
+                draggedElement = this;
+                setTimeout(() => this.style.opacity = "0.5", 0);
+            });
+
+            block.addEventListener("dragend", function() {
+                this.style.opacity = "1";
+            });
+
+            block.addEventListener("dragover", function(e) {
+                e.preventDefault();
+                let parent = this.parentElement;
+                let siblings = Array.from(parent.children);
+                let indexDragged = siblings.indexOf(draggedElement);
+                let indexTarget = siblings.indexOf(this);
+                if (indexDragged > indexTarget) {
+                    parent.insertBefore(draggedElement, this);
+                } else {
+                    parent.insertBefore(draggedElement, this.nextSibling);
+                }
+            });
+        });
+        
+        function checkOrder() {
+            let correctOrder = ["1", "2", "3"];
+            let currentBlocks = document.querySelectorAll(".interactive");
+            let currentOrder = Array.from(currentBlocks).map(el => el.textContent);
+            
+            currentBlocks.forEach((block, index) => {
+                if (currentOrder[index] === correctOrder[index]) {
+                    block.style.background = "#7CA982";
+                } else {
+                    block.style.background = "#FFAF87";
+                }
+            });
+        }
+    </script>
+</body>
+</html>
